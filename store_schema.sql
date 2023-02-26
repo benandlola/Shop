@@ -29,7 +29,7 @@ CREATE TABLE order_item (
 DROP TABLE IF EXISTS products;
 CREATE TABLE products (
   product_id        int(4) not null unique,
-  product_name      varchar(50) not null,
+  name              varchar(50) not null,
   stock             int(4) not null,
   price             decimal(4, 2) not null,
   description       varchar(100) not null,

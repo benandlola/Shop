@@ -7,6 +7,18 @@
     <title>Homepage</title>
 </head>
 <body>
-    
+    <h1>Welcome {{ session['username'] }}!</h1>
+
+    <h2>Select a category to view specific products or view all!</h2>
+    <form action="/products" method="POST">
+        <select name="category_select">
+            <option value="All">All</option>
+            {% for category in categories %}
+                <option value="{{ category['category'] }}">{{ category['category'] }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit">
+    </form> 
+
 </body>
 </html>
