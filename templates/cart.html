@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+</head>
+<body>
+    <ol>
+        {% for item in session['cart'] %}
+            <li>{{ item['name'] }} - ${{ item['price'] }}</li>
+            <form action="/cart" method="POST">
+                <button name="remove" value="{{ item['product_id'] }}">Remove Item</button>
+            </form>
+        {% endfor %}
+    </ol>
+
+    <a href="/"><h3>Add More</h3></a>
+    <form action="/cart" method="POST">
+        <button name="remove" value="all">Delete Cart</button>
+    </form>
+      <form action="/" method="POST">
+        <button name="checkout">Checkout</button>
+    </form>
+
+</body>
+</html>

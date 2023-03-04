@@ -7,9 +7,15 @@
     <title>Products</title>
 </head>
 <body>
-    <h1>{{ selected}} Products</h1>
+    <h1>{{ products[0]['part_of'] }} Products</h1>
     {% for prod in products %}
-        <li>{{ prod['name'] }} - {{ prod['stock'] }} in stock, ${{ prod['price'] }}: {{ prod['description'] }}</li>
+        <li>{{ prod['name'] }}: {{ prod['description'] }} - ${{ prod['price'] }}:</li>
+        {% if 'username' in session and prod['stock'] > 0 %}
+            <form action="/cart" method="POST">
+                <button name="add" value={{ prod['product_id'] }}>Add to Cart</button>
+            </form> 
+        {% endif %}
     {% endfor %}
+
 </body>
 </html>
