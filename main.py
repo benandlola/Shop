@@ -10,12 +10,7 @@ app.permanent_session_lifetime = timedelta(minutes=10)
 def home():
   conn = sqlite3.connect("myDatabase.db")
   conn.row_factory = sqlite3.Row
-
-  ####
-  cursor = conn.execute("SELECT * FROM products")
-  asd = cursor.fetchall()
-  for t in asd:
-    print(t['stock'])
+  session['page'] = ['', ''] #set
 
   #checking out
   if request.method == 'POST':
@@ -23,11 +18,6 @@ def home():
     for item in cart:
       cursor = conn.execute("UPDATE products SET stock = ? WHERE product_id = ?", (item['stock']-1, item['product_id']))
       conn.commit()
-      ####
-      cursor = conn.execute("SELECT * FROM products")
-      asd = cursor.fetchall()
-      for t in asd:
-        print(t['stock'])
 
     session['username'] = None
     session['cart'] = []
@@ -69,6 +59,9 @@ def products():
       cursor = conn.execute("SELECT * FROM products WHERE part_of = ?", (request.form.get('category_select'),))
       products = cursor.fetchall()
 
+      #store for return
+      session['page'] = ['category', request.form.get('category_select')]
+
       return render_template('products.html', products=products)
     
     return redirect('/')
@@ -82,6 +75,8 @@ def search():
       cursor = conn.execute("SELECT * FROM products WHERE name LIKE ?", (search,))
       products = cursor.fetchall()
 
+      session['page'] = ['search', search]
+
       return render_template('products.html', products=products)
     
     return redirect('/')
@@ -90,13 +85,14 @@ def search():
 def cart():
     if request.method == 'POST':
       
+      conn = sqlite3.connect("myDatabase.db")
+      conn.row_factory = sqlite3.Row
+      
       rem = request.form.get('remove')
       add = request.form.get('add')
-
+      
       #Add to the cart
       if add:
-        conn = sqlite3.connect("myDatabase.db")
-        conn.row_factory = sqlite3.Row
         cursor = conn.execute("SELECT * FROM products WHERE product_id = ?", (add,))
         product = cursor.fetchone()
         cursor = conn.execute("UPDATE products SET stock = ? WHERE product_id = ?", (product['stock']-1, add,))
@@ -105,7 +101,29 @@ def cart():
         cart.append(dict(product))
         session['cart'] = cart
 
-        return redirect(url_for('products'))
+        print(session)
+        print(session['page'])
+        #return to specific category
+        if session['page'][0] == 'category':
+          print('2')
+          sc = session['page'][1]
+          cursor = conn.execute("SELECT * FROM products WHERE part_of = ?", (sc,))
+          products = cursor.fetchall()
+          return render_template('products.html', products=products)
+        
+        #return to specific item
+        elif session['page'][0] == 'search':
+          print('3')
+          si = session['page'][1]
+          cursor = conn.execute("SELECT * FROM products WHERE name LIKE ?", (si,))
+          products = cursor.fetchall()
+          return render_template('products.html', products=products)
+        
+
+        ######
+        else: 
+          print('4')
+          return redirect(url_for('products'))
 
       #Delete the cart
       if rem == 'all':
@@ -116,6 +134,10 @@ def cart():
       cart = session['cart']
       for item in cart:
         if item['product_id'] == int(rem):
+          cursor = conn.execute("SELECT * FROM products WHERE product_id = ?", (rem,))
+          product = cursor.fetchone()
+          cursor = conn.execute("UPDATE products SET stock = ? WHERE product_id = ?", (product['stock']+1, rem,))
+          conn.commit()
           cart.remove(item)
           session['cart'] = cart
           return render_template('cart.html')

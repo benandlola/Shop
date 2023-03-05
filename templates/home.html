@@ -7,7 +7,7 @@
     <title>Homepage</title>
 </head>
 <body>
-    <h1>Welcome to The Shop! {{ session['username'] }}</h1>
+    <h1>Welcome to The Shop!</h1>
     {% if 'username' not in session %}
         <form action="/login" method="POST">
             Username <input type="text" name="username"> 
@@ -30,12 +30,14 @@
         <input placeholder="Search Products" type="text" name="search"> 
     </form> 
     {% for prod in products %}
-        <li>{{ prod['name'] }}: {{ prod['description'] }} - ${{ prod['price'] }}: </li>
+        <li>{{ prod['name'] }}: {{ prod['description'] }} - ${{ prod['price'] }}: {{ prod['stock'] }} left</li>
         {% if 'username' in session and prod['stock'] > 0 %}
             <form action="/cart" method="POST">
                 <button name="add" value={{ prod['product_id'] }}>Add to Cart</button>
-            </form> 
-        {% endif %}
+            </form>
+        {% elif prod['stock'] <= 0 %}
+            <p>OUT OF STOCK</p>
+        {% endif %} 
     {% endfor %}
 
     {% if 'username' in session %}
