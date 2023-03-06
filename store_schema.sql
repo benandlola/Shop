@@ -4,6 +4,8 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   username    varchar(50) not null unique,
   password    varchar(50) not null,
+  firstname   varchar(50) not null,
+  lastname    varchar(50) not null,
   PRIMARY KEY (username)
 );
 
@@ -12,29 +14,34 @@ CREATE TABLE orders (
   order_id      int(4) not null unique,
   date_time     varchar(50) not null,
   ordered_by    varchar(50) not null,
-  total         int(4) not null,
+  total         decimal(8, 2) not null,
+  PRIMARY KEY (order_id),
   FOREIGN KEY (ordered_by) REFERENCES users(username)
 );
 
 DROP TABLE IF EXISTS order_item;
 CREATE TABLE order_item (
-  order_id        int(4) not null unique,
-  date_time       varchar(50) not null,
-  ordered_by      varchar(50) not null,
+  o_id            varchar(50) not null,
+  item_id         int(4) not null,
+  d_time          varchar(50) not null,
+  added_by        varchar(50) not null,
   quantity        int(4) not null,
-  FOREIGN KEY (ordered_by) REFERENCES users(username),
-  FOREIGN KEY (date_time) REFERENCES orders(date_time)
+  PRIMARY KEY (o_id),
+  FOREIGN KEY (item_id) REFERENCES products(id),
+  FOREIGN KEY (added_by) REFERENCES users(username),
+  FOREIGN KEY (d_time) REFERENCES orders(date_time),
+  FOREIGN KEY (o_id) REFERENCES orders(order_id)
 );
 
 DROP TABLE IF EXISTS products;
 CREATE TABLE products (
-  product_id        int(4) not null unique,
+  id                int(4) not null unique,
   name              varchar(50) not null,
   stock             int(4) not null,
   price             decimal(4, 2) not null,
   description       varchar(100) not null,
   part_of           varchar(50) not null,
-  PRIMARY KEY (product_id),
+  PRIMARY KEY (id),
   FOREIGN KEY (part_of) REFERENCES categories(category)
 );
 
@@ -46,7 +53,7 @@ CREATE TABLE categories (
 
 PRAGMA foreign_keys=on;
 
-INSERT INTO users VALUES ('testuser', 'testpass');
+INSERT INTO users VALUES ('testuser', 'testpass', 'testfirst', 'testlast');
 
 INSERT INTO categories VALUES ('Socks');
 INSERT INTO products VALUES ('0001', 'pinksocks', '5', '5.99', 'These socks are pink!', 'Socks');

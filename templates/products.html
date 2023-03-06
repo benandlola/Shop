@@ -12,7 +12,7 @@
         <li>{{ prod['name'] }}: {{ prod['description'] }} - ${{ prod['price'] }}: {{ prod['stock'] }} left</li>
         {% if 'username' in session and prod['stock'] > 0 %}
             <form action="/cart" method="POST">
-                <button name="add" value={{ prod['product_id'] }}>Add to Cart</button>
+                <button name="add" value={{ prod['id'] }}>Add to Cart</button>
             </form> 
         {% elif prod['stock'] <= 0 %}
             <p>OUT OF STOCK</p>

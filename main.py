@@ -2,6 +2,12 @@ from flask import Flask, session, render_template, redirect, url_for, request
 import sqlite3
 from datetime import timedelta
 
+'''
+To “buy” a product means to reduce the quantity from that product with the quantity that was “bought” (i.e. your database should be updated to reflect the reduction in quantity of items after checkout, not when added to the cart).
+
+A logged in user can also see her order history which should include the list of items purchased and total cost of the order.
+'''
+
 app = Flask('app')
 app.secret_key = "lolaandben"
 app.permanent_session_lifetime = timedelta(minutes=10)
@@ -16,7 +22,7 @@ def home():
   if request.method == 'POST':
     cart = session['cart']
     for item in cart:
-      cursor = conn.execute("UPDATE products SET stock = ? WHERE product_id = ?", (item['stock']-1, item['product_id']))
+      cursor = conn.execute("UPDATE products SET stock = ? WHERE id = ?", (item['stock']-1, item['id']))
       conn.commit()
 
     session['username'] = None
@@ -93,19 +99,16 @@ def cart():
       
       #Add to the cart
       if add:
-        cursor = conn.execute("SELECT * FROM products WHERE product_id = ?", (add,))
+        cursor = conn.execute("SELECT * FROM products WHERE id = ?", (add,))
         product = cursor.fetchone()
-        cursor = conn.execute("UPDATE products SET stock = ? WHERE product_id = ?", (product['stock']-1, add,))
+        cursor = conn.execute("UPDATE products SET stock = ? WHERE id = ?", (product['stock']-1, add,))
         conn.commit()
         cart = session['cart']    
         cart.append(dict(product))
         session['cart'] = cart
 
-        print(session)
-        print(session['page'])
         #return to specific category
         if session['page'][0] == 'category':
-          print('2')
           sc = session['page'][1]
           cursor = conn.execute("SELECT * FROM products WHERE part_of = ?", (sc,))
           products = cursor.fetchall()
@@ -113,16 +116,12 @@ def cart():
         
         #return to specific item
         elif session['page'][0] == 'search':
-          print('3')
           si = session['page'][1]
           cursor = conn.execute("SELECT * FROM products WHERE name LIKE ?", (si,))
           products = cursor.fetchall()
           return render_template('products.html', products=products)
         
-
-        ######
         else: 
-          print('4')
           return redirect(url_for('products'))
 
       #Delete the cart
@@ -133,10 +132,10 @@ def cart():
       #If removing one item
       cart = session['cart']
       for item in cart:
-        if item['product_id'] == int(rem):
-          cursor = conn.execute("SELECT * FROM products WHERE product_id = ?", (rem,))
+        if item['id'] == int(rem):
+          cursor = conn.execute("SELECT * FROM products WHERE id = ?", (rem,))
           product = cursor.fetchone()
-          cursor = conn.execute("UPDATE products SET stock = ? WHERE product_id = ?", (product['stock']+1, rem,))
+          cursor = conn.execute("UPDATE products SET stock = ? WHERE id = ?", (product['stock']+1, rem,))
           conn.commit()
           cart.remove(item)
           session['cart'] = cart
