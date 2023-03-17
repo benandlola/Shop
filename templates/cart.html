@@ -7,9 +7,10 @@
     <title>Cart</title>
 </head>
 <body>
+    <h1><strong>{{ error }}</strong></h1>
     <ol>
         {% for item in session['cart'] %}
-            <li>{{ item['name'] }} - ${{ item['price'] }}</li>
+            <li>{{ item['name'] }} - ${{ item['price'] }}: {{ item['quantity'] }} in cart</li>
             <form action="/cart" method="POST">
                 <button name="remove" value="{{ item['id'] }}">Remove Item</button>
             </form>   

@@ -1,16 +1,21 @@
 from flask import Flask, session, render_template, redirect, url_for, request
+from flask_session import Session
 import sqlite3
 from datetime import timedelta
 
 '''
-To “buy” a product means to reduce the quantity from that product with the quantity that was “bought” (i.e. your database should be updated to reflect the reduction in quantity of items after checkout, not when added to the cart).
-
 A logged in user can also see her order history which should include the list of items purchased and total cost of the order.
+
+The store doesn’t let a user buy negative amounts OR more than is in the inventory.
 '''
+
+#TODO Session Permanence
+
 
 app = Flask('app')
 app.secret_key = "lolaandben"
-app.permanent_session_lifetime = timedelta(minutes=10)
+app.permanent_session_lifetime = timedelta(minutes=5)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -18,14 +23,29 @@ def home():
   conn.row_factory = sqlite3.Row
   session['page'] = ['', ''] #set
 
-  #checking out
+  #CHECKOUT
   if request.method == 'POST':
     cart = session['cart']
     for item in cart:
-      cursor = conn.execute("UPDATE products SET stock = ? WHERE id = ?", (item['stock']-1, item['id']))
+      prod = item['id']
+      new_stock = item['stock'] - item['quantity']
+      if new_stock < 0:
+        error =  str(item['quantity'] - item['stock']) + ' many items of ' + str(item['name']) + ' in cart'
+        return render_template('cart.html', error=error)
+      conn.execute("UPDATE products SET stock = ? WHERE id = ?",(new_stock, prod,))
       conn.commit()
+    conn.commit()
 
-    session['username'] = None
+    '''
+    cursor = conn.execute("SELECT * FROM products WHERE id = ?", (rem,))
+    product = cursor.fetchone()
+    cursor = conn.execute("UPDATE products SET stock = ? WHERE id = ?", (product['stock']+1, rem,))
+    conn.commit()
+
+    cursor = conn.execute("UPDATE products SET stock = ? WHERE id = ?", (product['stock']-1, add,))
+    conn.commit()
+    '''
+
     session['cart'] = []
     return redirect('/')
 
@@ -72,6 +92,7 @@ def products():
     
     return redirect('/')
   
+#Search for specific product or categories
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
@@ -87,6 +108,7 @@ def search():
     
     return redirect('/')
 
+#able to view the Cart and edit
 @app.route('/cart', methods=['GET','POST'])
 def cart():
     if request.method == 'POST':
@@ -101,10 +123,22 @@ def cart():
       if add:
         cursor = conn.execute("SELECT * FROM products WHERE id = ?", (add,))
         product = cursor.fetchone()
-        cursor = conn.execute("UPDATE products SET stock = ? WHERE id = ?", (product['stock']-1, add,))
-        conn.commit()
-        cart = session['cart']    
-        cart.append(dict(product))
+        cart = session['cart']   
+
+        #check to see if already added to update quantity; otherwise create
+        seen = False
+        for item in cart:
+          if item['id'] == product['id']:
+            seen = True
+            break
+        if seen:
+          item['quantity'] += 1
+        else:
+          added = dict(product)
+          added['quantity'] = 1
+          cart.append(added)
+          session['cart'] = cart
+
         session['cart'] = cart
 
         #return to specific category
@@ -133,11 +167,10 @@ def cart():
       cart = session['cart']
       for item in cart:
         if item['id'] == int(rem):
-          cursor = conn.execute("SELECT * FROM products WHERE id = ?", (rem,))
-          product = cursor.fetchone()
-          cursor = conn.execute("UPDATE products SET stock = ? WHERE id = ?", (product['stock']+1, rem,))
-          conn.commit()
-          cart.remove(item)
+          if item['quantity'] > 1:
+            item['quantity'] -= 1
+          else:
+            cart.remove(item)
           session['cart'] = cart
           return render_template('cart.html')
     
