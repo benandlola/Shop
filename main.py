@@ -6,7 +6,10 @@ from datetime import timedelta
 '''
 A logged in user can also see her order history which should include the list of items purchased and total cost of the order.
 
-The store doesn’t let a user buy negative amounts OR more than is in the inventory.
+
+A logged in user can see his/her previous order history.
+The front end is user friendly: website is easy and intuitive to navigate, no server error messages are presented to to user (if an error occurs, give a user friendly message).
+Website style: products have pictures.
 '''
 
 #TODO Session Permanence
@@ -36,16 +39,6 @@ def home():
       conn.commit()
     conn.commit()
 
-    '''
-    cursor = conn.execute("SELECT * FROM products WHERE id = ?", (rem,))
-    product = cursor.fetchone()
-    cursor = conn.execute("UPDATE products SET stock = ? WHERE id = ?", (product['stock']+1, rem,))
-    conn.commit()
-
-    cursor = conn.execute("UPDATE products SET stock = ? WHERE id = ?", (product['stock']-1, add,))
-    conn.commit()
-    '''
-
     session['cart'] = []
     return redirect('/')
 
@@ -74,6 +67,45 @@ def login():
         session['cart'] = []
       
   return redirect('/')
+
+#Create account Page
+@app.route('/create_account', methods=['GET','POST'])
+def create_account():
+  error = ''
+  if request.method == 'POST':
+    conn = sqlite3.connect("myDatabase.db")
+    conn.row_factory = sqlite3.Row
+    name = request.form['username']
+    passw = request.form['password']
+    fname = request.form['firstname']
+    lname = request.form['lastname']
+
+    if name == '':
+      error = 'username cannot be empty'
+      return render_template('create_account.html', error=error)
+    elif passw == '':
+      error = 'password cannot be empty'
+      return render_template('create_account.html', error=error)
+    elif fname == '':
+      error = 'firstname cannot be empty'
+      return render_template('create_account.html', error=error)
+    elif lname == '':
+      error = 'lastname cannot be empty'
+      return render_template('create_account.html', error=error)
+    
+    #check if username in use
+    cursor = conn.execute('SELECT username FROM users')
+    users = cursor.fetchall()
+    for user in users:
+      if user['username'] == name:
+        error = 'username already taken'
+        return render_template('create_account.html', error=error)
+
+    conn.execute("INSERT INTO users VALUES (?,?,?,?)", (name, passw, fname, lname))
+    conn.commit()
+    return redirect('/')
+  
+  return render_template('create_account.html', error=error)
 
 #Displays products by categories or all
 @app.route('/products', methods=['GET','POST'])
