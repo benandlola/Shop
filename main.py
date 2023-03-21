@@ -34,7 +34,7 @@ def home():
       prod = item['id']
       new_stock = item['stock'] - item['quantity']
       if new_stock < 0:
-        error =  str(item['quantity'] - item['stock']) + ' many items of ' + str(item['name']) + ' in cart'
+        error =  str(item['quantity'] - item['stock']) + ' too many items of ' + str(item['name']) + ' in cart'
         return render_template('cart.html', error=error)
       conn.execute("UPDATE products SET stock = ? WHERE id = ?",(new_stock, prod,))
 
