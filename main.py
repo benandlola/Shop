@@ -8,12 +8,7 @@ A logged in user can also see her order history which should include the list of
 
 
 A logged in user can see his/her previous order history.
-The front end is user friendly: website is easy and intuitive to navigate, no server error messages are presented to to user (if an error occurs, give a user friendly message).
-Website style: products have pictures.
 '''
-
-#TODO Session Permanence
-
 
 app = Flask('app')
 app.secret_key = "lolaandben"
@@ -24,11 +19,15 @@ app.permanent_session_lifetime = timedelta(minutes=5)
 def home():
   conn = sqlite3.connect("myDatabase.db")
   conn.row_factory = sqlite3.Row
+  #session.clear()
   session['page'] = ['', ''] #set
 
   #CHECKOUT
   if request.method == 'POST':
     cart = session['cart']
+    if len(cart) == 0:
+      error = 'cannot checkout on an empty cart'
+      return render_template('cart.html', error=error)
     for item in cart:
       prod = item['id']
       new_stock = item['stock'] - item['quantity']
@@ -61,11 +60,21 @@ def login():
     cursor = conn.execute("SELECT * FROM users")
     users = cursor.fetchall()
 
+    seen = False
     for user in users:
       if name == user['username'] and passw == user['password']:
         session['username'] = name
         session['cart'] = []
-      
+        seen = True
+
+    if seen == False:
+      error = 'username or password is incorrect'
+      cursor = conn.execute("SELECT * FROM products")
+      products = cursor.fetchall()
+      cursor = conn.execute("SELECT * FROM categories")
+      categories = cursor.fetchall()
+      return render_template('home.html', error=error,  products=products, categories=categories)
+ 
   return redirect('/')
 
 #Create account Page

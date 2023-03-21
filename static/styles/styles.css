@@ -1,0 +1,35 @@
+:root {
+  --colour-primary: hsl(229, 36%, 9%);
+  --colour-secondary: lightcoral;
+  --colour-third: darkslategray;
+  --colour-fourth: hsl(0, 73%, 26%);
+  --colour-fifth: burlywood;
+  --colour-white: ivory;
+}
+
+body {
+  font-family: "EB Garamond", serif;
+  font-size: 1.1rm;
+  color: var(--colour-secondary);
+  background-color: var(--colour-primary);
+}
+
+img {
+  width: 100px;
+  height: 100px;
+}
+
+.welcome {
+  display: flex;
+  align-items: center;
+}
+.welcome h1 {
+  color: var(--colour-white);
+  display: inline-block;
+}
+.welcome h2 {
+  color: var(--colour-fourth);
+  display: inline-block;
+  text-transform: uppercase;
+  padding-left: 0.4rem;
+}/*# sourceMappingURL=styles.css.map */

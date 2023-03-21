@@ -5,20 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homepage</title>
+    <link rel="stylesheet" href="static/styles/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Welcome to The Shop!</h1>
+    <div class="welcome">
+        <h1>Welcome to The Shop!</h1>
+        <h2>{{ session['username'] }}</h2>
+    </div>
+    <h1><strong>{{ error }}</strong></h1>
     {% if 'username' not in session %}
         <form action="/login" method="POST">
             Username <input type="text" name="username"> 
             Password <input type="text" name="password"> 
-        <input type="submit" name="submit"> 
+        <input type="submit" names="submit"> 
         </form>
     <h3>Don't have an account? Create one!</h3>
     <a href="create_account">Create Account</a>
     {% endif %}
     <h2>Select a category to view specific products</h2>
-    <form action="/products" method="POST" name="speccat">
+    <form action="/products" method="POST">
         <select name="category_select">
             {% for category in categories %}
                 <option value="{{ category['category'] }}">{{ category['category'] }}</option>
@@ -27,11 +36,12 @@
         <input type="submit">
     </form> 
     <h3>Search for a specific product</h3>
-    <form action="/search" method="POST" name="specitem">
+    <form action="/search" method="POST">
         <input placeholder="Search Products" type="text" name="search"> 
     </form> 
     {% for prod in products %}
         <li>{{ prod['name'] }}: {{ prod['description'] }} - ${{ prod['price'] }}: {{ prod['stock'] }} left</li>
+        <img src="/static/images/{{ prod['name'] }}.jpg">
         {% if 'username' in session and prod['stock'] > 0 %}
             <form action="/cart" method="POST">
                 <button name="add" value={{ prod['id'] }}>Add to Cart</button>

@@ -5,12 +5,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart</title>
+    <link rel="stylesheet" href="static/styles/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
 </head>
 <body>
     <h1><strong>{{ error }}</strong></h1>
     <ol>
         {% for item in session['cart'] %}
             <li>{{ item['name'] }} - ${{ item['price'] }}: {{ item['quantity'] }} in cart</li>
+            <img src="/static/images/{{ item['name'] }}.jpg">
             <form action="/cart" method="POST">
                 <button name="remove" value="{{ item['id'] }}">Remove Item</button>
             </form>   
