@@ -1,7 +1,7 @@
 :root{
     --colour-primary: hsl(229, 36%, 9%);
     --colour-secondary: lightcoral;
-    --colour-third: darkslategray;
+    --colour-third: aqua;
     --colour-fourth: hsl(0, 73%, 26%);
     --colour-fifth: burlywood;  
     --colour-white: ivory;
@@ -32,4 +32,16 @@ img {
         text-transform: uppercase;
         padding-left: 0.4rem;
     }
+}
+
+a {
+    color: whitesmoke;
+    &:hover {
+    background-color: var(--colour-fifth);
+    color: var(--colour-white);
+    }
+}
+
+li {
+    color: var(--colour-third);
 }

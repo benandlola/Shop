@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    <link rel="stylesheet" href="static/styles/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+</head>
+<body>
+    {% for order in orders %}
+        <p> order {{ order['order_id'] }} totaling ${{ order['total'] }} on {{ order['date_ord'] }}</p>
+        {% for item in orderitems %}
+            {% if item['o_id'] == order['order_id'] %}
+            <li>{{ item['name'] }} - ${{ item['price'] }}: {{ item['quantity'] }} in cart</li>
+            <img src="/static/images/{{ item['name'] }}.jpg">
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    <a href="/"><h3>Homepage</h3></a>
+</body>
+</html>

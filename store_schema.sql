@@ -12,7 +12,8 @@ CREATE TABLE users (
 DROP TABLE IF EXISTS orders;
 CREATE TABLE orders (
   order_id      int(4) not null unique,
-  date_time     varchar(50) not null,
+  date_ord      varchar(50) not null,
+  time_ord      varchar(50) not null,
   ordered_by    varchar(50) not null,
   total         decimal(8, 2) not null,
   PRIMARY KEY (order_id),
@@ -21,15 +22,16 @@ CREATE TABLE orders (
 
 DROP TABLE IF EXISTS order_item;
 CREATE TABLE order_item (
-  o_id            varchar(50) not null,
+  o_item_id       int(4) not null unique,
+  o_id            int(4) not null,
   item_id         int(4) not null,
-  d_time          varchar(50) not null,
+  d_ord           varchar(50) not null,
   added_by        varchar(50) not null,
   quantity        int(4) not null,
-  PRIMARY KEY (o_id),
+  PRIMARY KEY (o_item_id),
   FOREIGN KEY (item_id) REFERENCES products(id),
   FOREIGN KEY (added_by) REFERENCES users(username),
-  FOREIGN KEY (d_time) REFERENCES orders(date_time),
+  FOREIGN KEY (d_ord) REFERENCES orders(date_ord),
   FOREIGN KEY (o_id) REFERENCES orders(order_id)
 );
 

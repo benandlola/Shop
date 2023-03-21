@@ -1,14 +1,7 @@
 from flask import Flask, session, render_template, redirect, url_for, request
-from flask_session import Session
 import sqlite3
-from datetime import timedelta
-
-'''
-A logged in user can also see her order history which should include the list of items purchased and total cost of the order.
-
-
-A logged in user can see his/her previous order history.
-'''
+from datetime import timedelta, date
+import time
 
 app = Flask('app')
 app.secret_key = "lolaandben"
@@ -19,7 +12,7 @@ app.permanent_session_lifetime = timedelta(minutes=5)
 def home():
   conn = sqlite3.connect("myDatabase.db")
   conn.row_factory = sqlite3.Row
-  #session.clear()
+  #session.clear() #for resetting quick
   session['page'] = ['', ''] #set
 
   #CHECKOUT
@@ -28,6 +21,15 @@ def home():
     if len(cart) == 0:
       error = 'cannot checkout on an empty cart'
       return render_template('cart.html', error=error)
+    
+    #lil stuff for orders
+    cursor = conn.execute("SELECT COUNT(order_id) FROM orders")
+    orderid = cursor.fetchone()[0]+1
+    today = date.today()
+    now = time.time()
+    total = 0
+ 
+    #ckeckout and add to orders
     for item in cart:
       prod = item['id']
       new_stock = item['stock'] - item['quantity']
@@ -35,8 +37,18 @@ def home():
         error =  str(item['quantity'] - item['stock']) + ' many items of ' + str(item['name']) + ' in cart'
         return render_template('cart.html', error=error)
       conn.execute("UPDATE products SET stock = ? WHERE id = ?",(new_stock, prod,))
+
+      #for order item
+      cursor = conn.execute("SELECT COUNT(o_item_id) FROM order_item")
+      orderitemid = cursor.fetchone()[0]+1
+      total += item['price'] * item['quantity']
+      conn.execute("INSERT INTO order_item VALUES (?,?,?,?,?,?)", (orderitemid, orderid, item['id'], today, session['username'], item['quantity']))
       conn.commit()
+
+    #order
+    conn.execute("INSERT INTO orders VALUES (?,?,?,?,?)", (orderid, today, now, session['username'], total))
     conn.commit()
+    cursor = conn.execute("SELECT * FROM orders")
 
     session['cart'] = []
     return redirect('/')
@@ -216,5 +228,17 @@ def cart():
           return render_template('cart.html')
     
     return render_template('cart.html')
+
+#Orders
+@app.route('/orders', methods=['GET','POST'])
+def orders():
+  conn = sqlite3.connect("myDatabase.db")
+  conn.row_factory = sqlite3.Row
+  cursor = conn.execute("SELECT * FROM orders WHERE ordered_by = ?", (session['username'],))
+  orders = cursor.fetchall()
+  cursor.execute("SELECT o_item_id, o_id, name, price, quantity, id FROM order_item JOIN orders ON order_item.o_id = orders.order_id JOIN products ON order_item.item_id = products.id WHERE order_item.added_by = ?", (session['username'],))
+  orderitems = cursor.fetchall()
+  return render_template("orders.html", orders=orders, orderitems=orderitems)
+       
 
 app.run(host='0.0.0.0', port=8080)
